@@ -1,0 +1,50 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  creationTimestamp: null
+  name: java-springboot
+  namespace: default
+spec:
+  params:
+  - name: git-revision
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        build.appstudio.openshift.io/application: appstudio
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: java-springboot
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      creationTimestamp: null
+      generateName: java-springboot-
+      labels:
+        build.appstudio.openshift.io/application: appstudio
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: java-springboot
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      namespace: default
+    spec:
+      params:
+      - name: git-url
+        value: https://github.com/scoheb/devfile-sample-java-springboot-basic
+      - name: output-image
+        value: quay.io/release-e2e/user-workload:default-java-springboot-$(tt.params.git-revision)
+      - name: dockerfile
+        value: docker/Dockerfile
+      - name: path-context
+        value: .
+      pipelineRef:
+        bundle: quay.io/redhat-appstudio/build-templates-bundle:13f5d9c921b3f727684a00084037f673a0dc4273
+        name: docker-build
+      workspaces:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: appstudio
+        subPath: java-springboot/$(tt.params.git-revision)
+    status: {}
+status: {}
